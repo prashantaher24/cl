@@ -1,0 +1,79 @@
+Code:
+
+//LEX PROGRAM
+ 
+%{
+     #include<stdio.h>
+     #include "y.tab.h"
+%}
+
+%%
+[\n\t ]+   ;
+switch return SWITCH;
+case return CASE;
+default return DEFAULT;
+break return BREAK;
+[a-zA-Z]+  return VAR;
+[0-9]+   return CONST;
+. return yytext[0];
+
+%%
+int yywrap() {return 1;}
+
+
+//YACC program
+
+%{
+%}
+
+%token SWITCH VAR CONST CASE DEFAULT BREAK
+%%
+e:SWITCH '(' VAR ')'  '{' e1 '}' {printf("\nSwitch verified..\n");
+exit(0);}
+;
+
+e1:CASE CONST ':' ANYTHING ';' b
+      |DEFAULT ':' ANYTHING ';' b
+;
+
+
+ANYTHING:VAR '=' CONST
+  |
+;
+
+b:BREAK ';' b
+  |e1 
+  |
+;
+
+%%
+
+main()
+{
+	yyparse();
+	return 0;
+}
+void yyerror(const char *s)
+{
+	printf("\n%s\n",s);
+}
+
+/* OUTPUT :
+
+bendreg@ubuntu:~$ lex assign5.l
+bendreg@ubuntu:~$ bison -yd assign5.y
+bendreg@ubuntu:~$ cc lex.yy.c y.tab.c
+bendreg@ubuntu:~$ ./a.out
+switch(ch)
+{
+case 1:
+a=0;
+break;
+}
+
+Switch verified..
+bendreg@ubuntu:~$ ./a.out
+switch(ch)
+{
+}
+syntax error
